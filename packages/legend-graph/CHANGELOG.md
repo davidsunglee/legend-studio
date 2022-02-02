@@ -1,5 +1,11 @@
 # @finos/legend-graph
 
+## 1.0.4
+
+### Patch Changes
+
+- [#822](https://github.com/finos/legend-studio/pull/822) [`333c846d`](https://github.com/finos/legend-studio/commit/333c846df6f8eb7f0d5c5e7c156458b61955fc47) ([@YannanGao-gs](https://github.com/YannanGao-gs)) - Display properties mapped through inheritance mapping in the explorer tree
+
 ## 1.0.3
 
 ## 1.0.2
