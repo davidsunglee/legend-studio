@@ -16,6 +16,7 @@
 
 import { CORE_HASH_STRUCTURE } from '../../../../../../../../../MetaModelConst';
 import { type Hashable, hashArray } from '@finos/legend-shared';
+import { AuthenticationStrategy } from '../../../../../../../../metamodels/pure/packageableElements/store/relational/connection/AuthenticationStrategy';
 
 export abstract class V1_AuthenticationStrategy implements Hashable {
   abstract get hashCode(): string;
@@ -116,6 +117,38 @@ export class V1_UsernamePasswordAuthenticationStrategy
       this.baseVaultReference?.toString() ?? '',
       this.userNameVaultReference,
       this.passwordVaultReference,
+    ]);
+  }
+}
+
+export class V1_AwsOAuthAuthenticationStrategy
+  extends V1_AuthenticationStrategy
+  implements Hashable
+{
+  secretArn!: string;
+  discoveryUrl!: string;
+
+  get hashCode(): string {
+    return hashArray([
+      CORE_HASH_STRUCTURE.AWS_OAUTH_AUTHENTICATION_STRATEGY,
+      this.secretArn,
+      this.discoveryUrl,
+    ]);
+  }
+}
+
+export class V1_AwsPkAuthenticationStrategy
+  extends V1_AuthenticationStrategy
+  implements Hashable
+{
+  secretArn!: string;
+  user!: string;
+
+  get hashCode(): string {
+    return hashArray([
+      CORE_HASH_STRUCTURE.AWS_OAUTH_AUTHENTICATION_STRATEGY,
+      this.secretArn,
+      this.user,
     ]);
   }
 }

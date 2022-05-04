@@ -148,3 +148,35 @@ export class UsernamePasswordAuthenticationStrategy
     ]);
   }
 }
+
+export class AwsOAuthAuthenticationStrategy
+  extends AuthenticationStrategy
+  implements Hashable
+{
+  secretArn!: string;
+  discoveryUrl!: string;
+
+  get hashCode(): string {
+    return hashArray([
+      CORE_HASH_STRUCTURE.AWS_OAUTH_AUTHENTICATION_STRATEGY,
+      this.secretArn,
+      this.discoveryUrl,
+    ]);
+  }
+}
+
+export class AwsPkAuthenticationStrategy
+  extends AuthenticationStrategy
+  implements Hashable
+{
+  secretArn!: string;
+  user!: string;
+
+  get hashCode(): string {
+    return hashArray([
+      CORE_HASH_STRUCTURE.AWS_OAUTH_AUTHENTICATION_STRATEGY,
+      this.secretArn,
+      this.user,
+    ]);
+  }
+}

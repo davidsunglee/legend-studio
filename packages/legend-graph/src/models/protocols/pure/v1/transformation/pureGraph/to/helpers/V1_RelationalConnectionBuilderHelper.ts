@@ -39,6 +39,8 @@ import {
   OAuthAuthenticationStrategy,
   DefaultH2AuthenticationStrategy,
   DelegatedKerberosAuthenticationStrategy,
+  AwsOAuthAuthenticationStrategy,
+  AwsPkAuthenticationStrategy,
 } from '../../../../../../../metamodels/pure/packageableElements/store/relational/connection/AuthenticationStrategy';
 import type { V1_GraphBuilderContext } from '../../../../transformation/pureGraph/to/V1_GraphBuilderContext';
 import {
@@ -60,6 +62,8 @@ import {
   V1_ApiTokenAuthenticationStrategy,
   V1_DelegatedKerberosAuthenticationStrategy,
   V1_UsernamePasswordAuthenticationStrategy,
+  V1_AwsOAuthAuthenticationStrategy,
+  V1_AwsPkAuthenticationStrategy,
 } from '../../../../model/packageableElements/store/relational/connection/V1_AuthenticationStrategy';
 import type { StoreRelational_PureProtocolProcessorPlugin_Extension } from '../../../../../StoreRelational_PureProtocolProcessorPlugin_Extension';
 
@@ -276,6 +280,16 @@ export const V1_buildAuthenticationStrategy = (
         `OAuth authentication specification 'scopeName' field is missing or empty`,
       ),
     );
+  } else if (protocol instanceof V1_AwsOAuthAuthenticationStrategy) {
+    const strategy = new AwsOAuthAuthenticationStrategy();
+    strategy.secretArn = protocol.secretArn;
+    strategy.discoveryUrl = protocol.discoveryUrl;
+    return strategy;
+  } else if (protocol instanceof V1_AwsPkAuthenticationStrategy) {
+    const strategy = new AwsPkAuthenticationStrategy();
+    strategy.secretArn = protocol.secretArn;
+    strategy.user = protocol.user;
+    return strategy;
   } else if (protocol instanceof V1_UsernamePasswordAuthenticationStrategy) {
     assertNonEmptyString(
       protocol.userNameVaultReference,

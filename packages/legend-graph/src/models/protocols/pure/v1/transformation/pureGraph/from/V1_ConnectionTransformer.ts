@@ -37,6 +37,8 @@ import {
   DelegatedKerberosAuthenticationStrategy,
   OAuthAuthenticationStrategy,
   UsernamePasswordAuthenticationStrategy,
+  AwsOAuthAuthenticationStrategy,
+  AwsPkAuthenticationStrategy,
 } from '../../../../../../metamodels/pure/packageableElements/store/relational/connection/AuthenticationStrategy';
 import {
   type DatasourceSpecification,
@@ -73,6 +75,8 @@ import {
   V1_ApiTokenAuthenticationStrategy,
   V1_DelegatedKerberosAuthenticationStrategy,
   V1_OAuthAuthenticationStrategy,
+  V1_AwsOAuthAuthenticationStrategy,
+  V1_AwsPkAuthenticationStrategy,
 } from '../../../model/packageableElements/store/relational/connection/V1_AuthenticationStrategy';
 import type { V1_Connection } from '../../../model/packageableElements/connection/V1_Connection';
 import {
@@ -211,6 +215,24 @@ const transformOAuthtAuthenticationStrategy = (
   return auth;
 };
 
+const transformAwsOAuthAuthenticationStrategy = (
+  metamodel: AwsOAuthAuthenticationStrategy,
+): V1_AwsOAuthAuthenticationStrategy => {
+  const auth = new V1_AwsOAuthAuthenticationStrategy();
+  auth.secretArn = metamodel.secretArn;
+  auth.discoveryUrl = metamodel.discoveryUrl;
+  return auth;
+};
+
+const transformAwsPkAuthenticationStrategy = (
+  metamodel: AwsPkAuthenticationStrategy,
+): V1_AwsPkAuthenticationStrategy => {
+  const auth = new V1_AwsPkAuthenticationStrategy();
+  auth.secretArn = metamodel.secretArn;
+  auth.user = metamodel.user;
+  return auth;
+};
+
 const transformAuthenticationStrategy = (
   metamodel: AuthenticationStrategy,
   context: V1_GraphTransformerContext,
@@ -223,6 +245,10 @@ const transformAuthenticationStrategy = (
     return auth;
   } else if (metamodel instanceof OAuthAuthenticationStrategy) {
     return transformOAuthtAuthenticationStrategy(metamodel);
+  } else if (metamodel instanceof AwsOAuthAuthenticationStrategy) {
+    return transformAwsOAuthAuthenticationStrategy(metamodel);
+  } else if (metamodel instanceof AwsPkAuthenticationStrategy) {
+    return transformAwsPkAuthenticationStrategy(metamodel);
   } else if (metamodel instanceof ApiTokenAuthenticationStrategy) {
     const auth = new V1_ApiTokenAuthenticationStrategy();
     auth.apiToken = metamodel.apiToken;
