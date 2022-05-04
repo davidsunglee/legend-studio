@@ -16,11 +16,12 @@
 
 import packageJson from '../../../../package.json';
 import {
-  type PlainObject,
+  assertNonNullable,
   assertType,
   guaranteeNonEmptyString,
-  assertNonNullable,
   guaranteeNonNullable,
+  type PlainObject,
+  UnsupportedOperationError,
 } from '@finos/legend-shared';
 import { deserialize, serialize } from 'serializr';
 import type { PureModel } from '../../../graph/PureModel';
@@ -51,12 +52,12 @@ import type {
   V1_ConnectionTransformer,
 } from './DSLMapping_PureProtocolProcessorPlugin_Extension';
 import {
+  PureProtocolProcessorPlugin,
   type V1_ElementProtocolClassifierPathGetter,
   type V1_ElementProtocolDeserializer,
   type V1_ElementProtocolSerializer,
   type V1_ElementTransformer,
   type V1_ExecutionInputGetter,
-  PureProtocolProcessorPlugin,
 } from './PureProtocolProcessorPlugin';
 import type { V1_PureModelContextData } from './v1/model/context/V1_PureModelContextData';
 import type { V1_Connection } from './v1/model/packageableElements/connection/V1_Connection';
@@ -82,13 +83,21 @@ import {
   type V1_GraphBuilderContext,
 } from './v1/transformation/pureGraph/to/V1_GraphBuilderContext';
 import {
-  V1_bindingModelSchema,
   V1_BINDING_ELEMENT_PROTOCOL_TYPE,
-  V1_externalFormatConnectionModelSchema,
+  V1_bindingModelSchema,
   V1_EXTERNAL_FORMAT_CONNECTION_ELEMENT_PROTOCOL_TYPE,
-  V1_schemaSetModelSchema,
+  V1_externalFormatConnectionModelSchema,
   V1_SCHEMA_SET_ELEMENT_PROTOCOL_TYPE,
+  V1_schemaSetModelSchema,
 } from './v1/transformation/pureProtocol/serializationHelpers/V1_DSLExternalFormat_ProtocolHelper';
+import {
+  V1_AwsPartition,
+  V1_AwsS3Connection,
+} from './v1/model/packageableElements/connection/V1_AwsS3Connection';
+import {
+  AwsPartition,
+  AwsS3Connection,
+} from '../../metamodels/pure/packageableElements/connection/AwsS3Connection';
 
 const BINDING_ELEMENT_CLASSIFIER_PATH =
   'meta::external::shared::format::binding::Binding';
@@ -357,10 +366,53 @@ export class DSLExternalFormat_PureProtocolProcessorPlugin
           );
           externalFormatConnection.externalSource = urlStream;
           return externalFormatConnection;
+        } else if (connection instanceof V1_AwsS3Connection) {
+          const Store = !store
+            ? V1_resolveBinding(
+                guaranteeNonNullable(
+                  connection.store,
+                  `External format connection 'store' field is missing`,
+                ),
+                context,
+              )
+            : connection.store
+            ? V1_resolveBinding(connection.store, context)
+            : ((): PackageableElementReference<Binding> => {
+                assertType(
+                  store.value,
+                  Binding,
+                  `External format connection store must be a Binding`,
+                );
+                return store as PackageableElementReference<Binding>;
+              })();
+
+          const awsS3Connection = new AwsS3Connection(Store);
+          awsS3Connection.partition = this.V1_buildAwsPartition(
+            connection.partition,
+            context,
+          );
+          awsS3Connection.region = connection.region;
+          awsS3Connection.bucket = connection.bucket;
+
+          return awsS3Connection;
         }
         return undefined;
       },
     ];
+  }
+
+  V1_buildAwsPartition(
+    protocol: V1_AwsPartition,
+    context: V1_GraphBuilderContext,
+  ): AwsPartition {
+    if (protocol === V1_AwsPartition.AWS) {
+      return AwsPartition.AWS;
+    } else if (protocol === V1_AwsPartition.AWS_CN) {
+      return AwsPartition.AWS_CN;
+    } else if (protocol === V1_AwsPartition.AWS_US_GOV) {
+      return AwsPartition.AWS_US_GOV;
+    }
+    throw new UnsupportedOperationError(`Can't build AWS partition, protocol`);
   }
 
   V1_getExtraConnectionTransformers(): V1_ConnectionTransformer[] {
@@ -376,10 +428,36 @@ export class DSLExternalFormat_PureProtocolProcessorPlugin
           urlStream.url = metamodel.externalSource.url;
           connection.externalSource = urlStream;
           return connection;
+        } else if (metamodel instanceof AwsS3Connection) {
+          const connection = new V1_AwsS3Connection();
+          connection.store = V1_transformElementReference(metamodel.store);
+          connection.partition = this.V1_transformAwsPartition(
+            metamodel.partition,
+            context,
+          );
+          connection.region = metamodel.region;
+          connection.bucket = metamodel.bucket;
+          return connection;
         }
         return undefined;
       },
     ];
+  }
+
+  V1_transformAwsPartition(
+    element: AwsPartition,
+    context: V1_GraphTransformerContext,
+  ): V1_AwsPartition {
+    if (element === AwsPartition.AWS) {
+      return V1_AwsPartition.AWS;
+    } else if (element === AwsPartition.AWS_CN) {
+      return V1_AwsPartition.AWS_CN;
+    } else if (element === AwsPartition.AWS_US_GOV) {
+      return V1_AwsPartition.AWS_US_GOV;
+    }
+    throw new UnsupportedOperationError(
+      `Can't transform AWS partition '${element}'`,
+    );
   }
 
   V1_getExtraConnectionProtocolSerializers(): V1_ConnectionProtocolSerializer[] {
