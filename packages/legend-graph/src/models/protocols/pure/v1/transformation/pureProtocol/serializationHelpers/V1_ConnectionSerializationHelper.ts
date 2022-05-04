@@ -62,11 +62,14 @@ import {
   V1_DefaultH2AuthenticationStrategy,
   V1_DelegatedKerberosAuthenticationStrategy,
   V1_UsernamePasswordAuthenticationStrategy,
+  V1_AwsOAuthAuthenticationStrategy,
+  V1_AwsPkAuthenticationStrategy,
 } from '../../../model/packageableElements/store/relational/connection/V1_AuthenticationStrategy';
 import type { PureProtocolProcessorPlugin } from '../../../../PureProtocolProcessorPlugin';
 import type { StoreRelational_PureProtocolProcessorPlugin_Extension } from '../../../../StoreRelational_PureProtocolProcessorPlugin_Extension';
 import type { DSLMapping_PureProtocolProcessorPlugin_Extension } from '../../../../DSLMapping_PureProtocolProcessorPlugin_Extension';
 import { V1_ConnectionPointer } from '../../../model/packageableElements/connection/V1_ConnectionPointer';
+import { V1_AwsS3Connection } from '../../../model/packageableElements/connection/V1_AwsS3Connection';
 
 export const V1_PACKAGEABLE_CONNECTION_ELEMENT_PROTOCOL_TYPE = 'connection';
 
@@ -77,6 +80,7 @@ export enum V1_ConnectionType {
   JSON_MODEL_CONNECTION = 'JsonModelConnection',
   XML_MODEL_CONNECTION = 'XmlModelConnection',
   FLAT_DATA_CONNECTION = 'FlatDataConnection',
+  AWS_S3_CONNECTION = 'AwsS3Connection',
   RELATIONAL_DATABASE_CONNECTION = 'RelationalDatabaseConnection',
 }
 
@@ -147,6 +151,17 @@ export const V1_flatDataConnectionModelSchema = createModelSchema(
     _type: usingConstantValueSchema(V1_ConnectionType.FLAT_DATA_CONNECTION),
     store: alias('element', primitive()),
     url: primitive(),
+  },
+);
+
+export const V1_awsS3ConnectionModelSchema = createModelSchema(
+  V1_AwsS3Connection,
+  {
+    _type: usingConstantValueSchema(V1_ConnectionType.AWS_S3_CONNECTION),
+    store: alias('element', primitive()),
+    partition: primitive(),
+    region: primitive(),
+    bucket: primitive(),
   },
 );
 
@@ -341,6 +356,8 @@ enum V1_AuthenticationStrategyType {
   API_TOKEN = 'apiToken',
   H2_DEFAULT = 'h2Default',
   OAUTH = 'oauth',
+  AWS_OAUTH = 'awsOauth',
+  AWS_PK = 'awsPrivateKey',
   USERNAME_PASSWORD = 'userNamePassword',
 }
 
@@ -407,6 +424,24 @@ const V1_oAuthAuthenticationStrategyModelSchema = createModelSchema(
   },
 );
 
+const V1_awsOauthAuthenticationStrategyModelSchema = createModelSchema(
+  V1_AwsOAuthAuthenticationStrategy,
+  {
+    _type: usingConstantValueSchema(V1_AuthenticationStrategyType.AWS_OAUTH),
+    secretArn: primitive(),
+    discoveryUrl: primitive(),
+  },
+);
+
+const V1_awsPkAuthenticationStrategyModelSchema = createModelSchema(
+  V1_AwsPkAuthenticationStrategy,
+  {
+    _type: usingConstantValueSchema(V1_AuthenticationStrategyType.AWS_PK),
+    secretArn: primitive(),
+    user: primitive(),
+  },
+);
+
 export const V1_serializeAuthenticationStrategy = (
   protocol: V1_AuthenticationStrategy,
   plugins: PureProtocolProcessorPlugin[],
@@ -435,6 +470,10 @@ export const V1_serializeAuthenticationStrategy = (
     );
   } else if (protocol instanceof V1_OAuthAuthenticationStrategy) {
     return serialize(V1_oAuthAuthenticationStrategyModelSchema, protocol);
+  } else if (protocol instanceof V1_AwsOAuthAuthenticationStrategy) {
+    return serialize(V1_awsOauthAuthenticationStrategyModelSchema, protocol);
+  } else if (protocol instanceof V1_AwsPkAuthenticationStrategy) {
+    return serialize(V1_awsPkAuthenticationStrategyModelSchema, protocol);
   } else if (protocol instanceof V1_UsernamePasswordAuthenticationStrategy) {
     return serialize(
       V1_UsernamePasswordAuthenticationStrategyModelSchema,
@@ -487,6 +526,10 @@ export const V1_deserializeAuthenticationStrategy = (
       );
     case V1_AuthenticationStrategyType.OAUTH:
       return deserialize(V1_oAuthAuthenticationStrategyModelSchema, json);
+    case V1_AuthenticationStrategyType.AWS_OAUTH:
+      return deserialize(V1_AwsOAuthAuthenticationStrategy, json);
+    case V1_AuthenticationStrategyType.AWS_PK:
+      return deserialize(V1_AwsPkAuthenticationStrategy, json);
     case V1_AuthenticationStrategyType.USERNAME_PASSWORD:
       return deserialize(
         V1_UsernamePasswordAuthenticationStrategyModelSchema,
@@ -529,6 +572,8 @@ export const V1_serializeConnectionValue = (
     return serialize(V1_flatDataConnectionModelSchema, protocol);
   } else if (protocol instanceof V1_RelationalDatabaseConnection) {
     return serialize(V1_RelationalDatabaseConnection, protocol);
+  } else if (protocol instanceof V1_AwsS3Connection) {
+    return serialize(V1_awsS3ConnectionModelSchema, protocol);
   } else if (protocol instanceof V1_ConnectionPointer) {
     if (allowPointer) {
       return serialize(V1_connectionPointerModelSchema, protocol);
@@ -569,6 +614,8 @@ export const V1_deserializeConnectionValue = (
       return deserialize(V1_xmlModelConnectionModelSchema, json);
     case V1_ConnectionType.FLAT_DATA_CONNECTION:
       return deserialize(V1_flatDataConnectionModelSchema, json);
+    case V1_ConnectionType.AWS_S3_CONNECTION:
+      return deserialize(V1_awsS3ConnectionModelSchema, json);
     case V1_ConnectionType.RELATIONAL_DATABASE_CONNECTION:
       return deserialize(V1_RelationalDatabaseConnection, json);
     case V1_ConnectionType.CONNECTION_POINTER:
