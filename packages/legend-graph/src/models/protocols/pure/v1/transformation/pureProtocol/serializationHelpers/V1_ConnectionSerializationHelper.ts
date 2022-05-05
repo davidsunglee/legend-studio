@@ -356,8 +356,8 @@ enum V1_AuthenticationStrategyType {
   API_TOKEN = 'apiToken',
   H2_DEFAULT = 'h2Default',
   OAUTH = 'oauth',
-  AWS_OAUTH = 'awsOauth',
-  AWS_PK = 'awsPrivateKey',
+  AWS_OAUTH = 'awsOAuth',
+  AWS_PK = 'awsPK',
   USERNAME_PASSWORD = 'userNamePassword',
 }
 
