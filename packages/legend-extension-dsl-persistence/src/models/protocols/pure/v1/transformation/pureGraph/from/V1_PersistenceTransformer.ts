@@ -639,6 +639,13 @@ export const V1_transformPersistence = (
   protocol.documentation = element.documentation;
   protocol.trigger = V1_transformTrigger(element.trigger, context);
   protocol.service = V1_transformElementReference(element.service);
+  if (element.serviceInput) {
+    protocol.serviceInput = V1_transformConnection(
+      element.serviceInput,
+      true,
+      context,
+    );
+  }
   protocol.persister = V1_transformPersister(element.persister, context);
   protocol.notifier = V1_transformNotifier(element.notifier, context);
   return protocol;

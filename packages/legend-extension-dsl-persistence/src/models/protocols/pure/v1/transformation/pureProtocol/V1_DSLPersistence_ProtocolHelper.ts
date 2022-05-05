@@ -1062,6 +1062,10 @@ export const V1_persistenceModelSchema = (
       (val) => V1_deserializePersister(val, plugins),
     ),
     service: primitive(),
+    serviceInput: custom(
+      (val) => (val ? V1_serializeConnectionValue(val, true, plugins) : SKIP),
+      (val) => V1_deserializeConnectionValue(val, true, plugins),
+    ),
     trigger: custom(
       (val) => V1_serializeTrigger(val),
       (val) => V1_deserializeTrigger(val),

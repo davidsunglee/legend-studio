@@ -643,6 +643,11 @@ export const V1_buildPersistence = (
     `Persistence 'documentation' field is missing or empty`,
   );
   persistence.trigger = V1_buildTrigger(protocol.trigger, context);
+  if (protocol.serviceInput) {
+    persistence.serviceInput = protocol.serviceInput.accept_ConnectionVisitor(
+      new V1_ProtocolToMetaModelConnectionBuilder(context),
+    );
+  }
   persistence.service = context.resolveService(protocol.service);
   persistence.persister = V1_buildPersister(protocol.persister, context);
   persistence.notifier = V1_buildNotifier(protocol.notifier, context);

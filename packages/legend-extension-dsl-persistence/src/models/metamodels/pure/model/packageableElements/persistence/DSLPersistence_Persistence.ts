@@ -19,6 +19,7 @@ import type { Persister } from './DSLPersistence_Persister';
 import type { Trigger } from './DSLPersistence_Trigger';
 import { PERSISTENCE_HASH_STRUCTURE } from '../../../../../DSLPersistence_ModelUtils';
 import {
+  Connection,
   PackageableElement,
   type PackageableElementReference,
   type PackageableElementVisitor,
@@ -29,6 +30,7 @@ import { type Hashable, hashArray } from '@finos/legend-shared';
 export class Persistence extends PackageableElement implements Hashable {
   documentation!: string;
   trigger!: Trigger;
+  serviceInput?: Connection;
   service!: PackageableElementReference<Service>;
   persister!: Persister;
   notifier!: Notifier;
@@ -38,6 +40,7 @@ export class Persistence extends PackageableElement implements Hashable {
       PERSISTENCE_HASH_STRUCTURE.PERSISTENCE,
       this.documentation,
       this.trigger,
+      this.serviceInput ?? '',
       this.service.hashValue,
       this.persister,
       this.notifier,

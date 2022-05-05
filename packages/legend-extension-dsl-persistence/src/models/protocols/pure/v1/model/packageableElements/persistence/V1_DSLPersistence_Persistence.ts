@@ -18,6 +18,7 @@ import type { V1_Notifier } from './V1_DSLPersistence_Notifier';
 import type { V1_Persister } from './V1_DSLPersistence_Persister';
 import type { V1_Trigger } from './V1_DSLPersistence_Trigger';
 import {
+  V1_Connection,
   V1_PackageableElement,
   type V1_PackageableElementVisitor,
 } from '@finos/legend-graph';
@@ -27,6 +28,7 @@ import { PERSISTENCE_HASH_STRUCTURE } from '../../../../../../DSLPersistence_Mod
 export class V1_Persistence extends V1_PackageableElement implements Hashable {
   documentation!: string;
   trigger!: V1_Trigger;
+  serviceInput?: V1_Connection;
   service!: string;
   persister!: V1_Persister;
   notifier!: V1_Notifier;
@@ -36,6 +38,7 @@ export class V1_Persistence extends V1_PackageableElement implements Hashable {
       PERSISTENCE_HASH_STRUCTURE.PERSISTENCE,
       this.documentation,
       this.trigger,
+      this.serviceInput ?? '',
       this.service,
       this.persister,
       this.notifier,
