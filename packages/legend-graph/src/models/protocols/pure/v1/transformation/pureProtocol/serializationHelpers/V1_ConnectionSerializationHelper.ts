@@ -80,7 +80,7 @@ export enum V1_ConnectionType {
   JSON_MODEL_CONNECTION = 'JsonModelConnection',
   XML_MODEL_CONNECTION = 'XmlModelConnection',
   FLAT_DATA_CONNECTION = 'FlatDataConnection',
-  AWS_S3_CONNECTION = 'AwsS3Connection',
+  AWS_S3_CONNECTION = 'S3Connection',
   RELATIONAL_DATABASE_CONNECTION = 'RelationalDatabaseConnection',
 }
 
